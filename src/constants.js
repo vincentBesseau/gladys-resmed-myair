@@ -129,6 +129,9 @@ export const CONFIG_SCHEMA_KEYS = {
   REGION: 'region',
   USERNAME: 'username',
   PASSWORD: 'password',
+  // Consumable replacement intervals in days (0 = tracking disabled).
+  DEVICE_FILTER_INTERVAL: 'device_filter_interval_days',
+  MASK_FILTER_INTERVAL: 'mask_filter_interval_days',
 };
 
 // Config keys stored OUTSIDE the config_schema (internal token storage, never
@@ -147,4 +150,8 @@ export const CONFIG_KEYS = {
   // per-account, not the regional default).
   MFA_STATE_TOKEN: 'mfa_state_token',
   MFA_URL: 'mfa_url',
+  // Last replacement date (ISO) of each tracked consumable, used to compute
+  // its remaining life.
+  DEVICE_FILTER_REPLACED_AT: 'device_filter_replaced_at',
+  MASK_FILTER_REPLACED_AT: 'mask_filter_replaced_at',
 };

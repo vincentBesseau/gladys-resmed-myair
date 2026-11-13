@@ -15,16 +15,18 @@ import {
   DEVICE_FEATURE_UNITS,
 } from '@gladysassistant/integration-sdk';
 import { DEVICE_TYPE, POLL_FREQUENCY_IN_MS } from './constants.js';
+import { FILTERS, intervalDaysFor } from './maintenance.js';
 
 /**
  * Build a Gladys device from a raw ResMed myAir device.
  * @param {object} gladys - The Gladys SDK instance (for externalIds).
  * @param {object} device - A device from getUserDeviceData().
+ * @param {object} [config] - The integration config (enables maintenance features).
  * @returns {object} The Gladys device, with prefixed external ids.
  * @example
- * convertToGladysDevice(gladys, device);
+ * convertToGladysDevice(gladys, device, config);
  */
-export function convertToGladysDevice(gladys, device) {
+export function convertToGladysDevice(gladys, device, config = {}) {
   const ids = gladys.externalIds(DEVICE_TYPE, device.serialNumber);
   const name = device.localizedName || device.deviceSeries || 'ResMed CPAP';
 
@@ -91,6 +93,25 @@ export function convertToGladysDevice(gladys, device) {
       keep_history: true,
     },
   ];
+
+  // Consumable maintenance: one "life remaining" (%) feature per enabled filter.
+  // The user triggers a scene on it ("life <= 10% -> replace the filter").
+  for (const filter of FILTERS) {
+    if (intervalDaysFor(config, filter) > 0) {
+      features.push({
+        name: `${name} - ${filter.labelEn}`,
+        external_id: ids.feature(filter.featureKey),
+        category: DEVICE_FEATURE_CATEGORIES.MAINTENANCE,
+        type: DEVICE_FEATURE_TYPES.MAINTENANCE.LIFE_REMAINING,
+        unit: DEVICE_FEATURE_UNITS.PERCENT,
+        min: 0,
+        max: 100,
+        read_only: true,
+        has_feedback: false,
+        keep_history: true,
+      });
+    }
+  }
 
   return {
     name,

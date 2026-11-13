@@ -98,6 +98,36 @@
         "en": "After saving, ResMed emails you a one-time verification code. The connection status below will ask for it: use the \"Enter verification code\" action to finish connecting. This device is then remembered, so you should not be asked again unless the remembered device expires - in which case use the \"Reconnect\" action to receive a fresh code.",
         "fr": "Après l'enregistrement, ResMed vous envoie un code de vérification à usage unique par email. Le statut de connexion ci-dessous vous le demandera : utilisez l'action « Saisir le code de vérification » pour terminer la connexion. Cet appareil est ensuite mémorisé, vous ne devriez donc plus être sollicité, sauf expiration de l'appareil mémorisé - auquel cas utilisez l'action « Reconnecter » pour recevoir un nouveau code."
       }
+    },
+    {
+      "key": "maintenance_note",
+      "type": "section",
+      "label": {
+        "en": "Filter maintenance",
+        "fr": "Entretien des filtres"
+      },
+      "description": {
+        "en": "Track when to replace your filters. Set a replacement interval in days (0 disables tracking). A \"Filter life\" sensor (%) is created for each enabled filter: trigger a scene on it (e.g. life below 10%) to be reminded. Use the \"Mark a filter as replaced\" action each time you change one.",
+        "fr": "Suivez quand remplacer vos filtres. Indiquez un intervalle de remplacement en jours (0 = désactivé). Un capteur « Vie du filtre » (%) est créé pour chaque filtre activé : déclenchez une scène dessus (ex. vie sous les 10 %) pour être prévenu. Utilisez l'action « Marquer un filtre comme remplacé » à chaque changement."
+      }
+    },
+    {
+      "key": "device_filter_interval_days",
+      "type": "number",
+      "label": {
+        "en": "Device filter interval (days, 0 = off)",
+        "fr": "Intervalle filtre appareil (jours, 0 = désactivé)"
+      },
+      "default": 30
+    },
+    {
+      "key": "mask_filter_interval_days",
+      "type": "number",
+      "label": {
+        "en": "Mask filter interval (days, 0 = off)",
+        "fr": "Intervalle filtre masque (jours, 0 = désactivé)"
+      },
+      "default": 30
     }
   ],
   "actions": [
@@ -147,6 +177,42 @@
         "fr": "Actualiser les données maintenant"
       },
       "timeout_seconds": 30
+    },
+    {
+      "key": "mark_filter_replaced",
+      "label": {
+        "en": "Mark a filter as replaced",
+        "fr": "Marquer un filtre comme remplacé"
+      },
+      "timeout_seconds": 15,
+      "fields": [
+        {
+          "key": "filter",
+          "type": "select",
+          "label": {
+            "en": "Filter",
+            "fr": "Filtre"
+          },
+          "required": true,
+          "default": "device",
+          "options": [
+            {
+              "value": "device",
+              "label": {
+                "en": "Device filter",
+                "fr": "Filtre appareil"
+              }
+            },
+            {
+              "value": "mask",
+              "label": {
+                "en": "Mask filter",
+                "fr": "Filtre masque"
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "key": "disconnect",

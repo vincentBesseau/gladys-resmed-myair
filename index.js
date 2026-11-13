@@ -17,13 +17,18 @@
 import { GladysIntegration, logger } from '@gladysassistant/integration-sdk';
 import { MyAirAuthClient, MFARequiredError } from './src/MyAirAuthClient.js';
 import { MyAirApiClient } from './src/MyAirApiClient.js';
-import { buildDiscoveredDevices, pollDevice } from './src/devices.js';
-import { REFRESH_INTERVAL_MS } from './src/constants.js';
+import { buildDiscoveredDevices, pollDevice, serialFromDevice } from './src/devices.js';
+import { REFRESH_INTERVAL_MS, DEVICE_TYPE } from './src/constants.js';
 import { WIDGET_KEY, buildWidgetContent, buildDisconnectedWidgetContent } from './src/widget.js';
+import { FILTERS, computeMaintenanceStates } from './src/maintenance.js';
 
 const gladys = new GladysIntegration();
 const auth = new MyAirAuthClient(gladys);
 const apiClient = new MyAirApiClient(auth);
+
+// Serial of the last discovered CPAP, used to publish maintenance states right
+// after a "mark replaced" action without re-fetching the device from the cloud.
+let lastKnownSerial = null;
 
 // Gladys ticks onPoll every minute (its slowest allowed frequency), but the
 // myAir data only changes ~once a day, so we actually refresh at most every
@@ -97,6 +102,9 @@ async function discoverAndPublish({ allowMfaEmail = false } = {}) {
   try {
     const devices = await buildDiscoveredDevices(gladys, apiClient);
     await gladys.publishDiscoveredDevices(devices);
+    if (devices[0]) {
+      lastKnownSerial = serialFromDevice(devices[0].external_id);
+    }
     await gladys.setConnectionStatus(true).catch(() => {});
     logger.info(`ResMed myAir: published ${devices.length} device(s).`);
   } catch (e) {
@@ -208,6 +216,29 @@ gladys.onAction('scan_now', async () => {
   logger.info('Action scan_now -> refreshing the ResMed CPAP machine');
   await discoverAndPublish({ allowMfaEmail: false });
   return { en: 'Refresh complete.', fr: 'Actualisation terminée.' };
+});
+
+// --- Manifest action: mark a consumable filter as replaced -------------------
+gladys.onAction('mark_filter_replaced', async (fields) => {
+  const filter = FILTERS.find((f) => f.id === String(fields.filter || '').trim());
+  if (!filter) {
+    return { en: 'Pick a filter first.', fr: "Choisissez d'abord un filtre." };
+  }
+  logger.info(`Action mark_filter_replaced -> ${filter.id}`);
+  await gladys.setConfig({ [filter.replacedConfigKey]: new Date().toISOString() });
+  // Publish the refreshed life (100%) right away, without a cloud round-trip.
+  if (lastKnownSerial) {
+    const ids = gladys.externalIds(DEVICE_TYPE, lastKnownSerial);
+    const config = (await gladys.getConfig()) || {};
+    const { states } = computeMaintenanceStates(ids, config, Date.now());
+    if (states.length > 0) {
+      await gladys.publishStates(states).catch(() => {});
+    }
+  }
+  return {
+    en: `${filter.labelEn} marked as replaced.`,
+    fr: `${filter.labelFr} marqué comme remplacé.`,
+  };
 });
 
 // --- Manifest action: disconnect ---------------------------------------------

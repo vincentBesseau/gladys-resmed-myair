@@ -45,6 +45,17 @@ L'appareil est ensuite **mémorisé** : vous ne devriez plus être sollicité po
 - **Actualiser les données maintenant** — relance la récupération immédiatement.
 - **Déconnecter** — supprime les jetons stockés.
 
+## Entretien des filtres (rappels)
+
+L'intégration peut suivre l'usure de vos filtres et vous **rappeler quand les changer** :
+
+1. Dans la **Configuration**, renseignez un **intervalle de remplacement en jours** pour le **filtre appareil** et/ou le **filtre masque** (0 = suivi désactivé). Défaut : 30 jours.
+2. Un capteur **« Vie du filtre »** (en %) est créé pour chaque filtre activé — il décroît de 100 % à 0 % sur l'intervalle.
+3. Créez une **scène** déclenchée par ce capteur (ex. _quand « Vie filtre appareil » ≤ 10 % → m'envoyer une notification_). C'est votre rappel.
+4. À chaque changement, lancez l'action **« Marquer un filtre comme remplacé »** (choisissez le filtre) : la vie repart à 100 %.
+
+Le calcul se fait en **jours calendaires** depuis le dernier remplacement.
+
 ## Widget tableau de bord
 
 L'intégration fournit un widget **« Dernière nuit »** à ajouter à vos tableaux de bord (éditeur → **+** → « Dernière nuit »). Il affiche en tuiles les 4 métriques de la nuit la plus récente (usage, IAH, fuite au masque, score), avec un code couleur par seuil (vert / orange / rouge). Sans données récentes, il affiche un état vide explicite.

@@ -9,6 +9,7 @@
 import { logger } from '@gladysassistant/integration-sdk';
 import { convertToGladysDevice } from './convertToGladysDevice.js';
 import { latestSleepRecord } from './MyAirApiClient.js';
+import { computeMaintenanceStates, missingIntervalDefaults } from './maintenance.js';
 import { DEVICE_TYPE, MINUTES_PER_HOUR } from './constants.js';
 
 /**
@@ -36,7 +37,15 @@ export async function buildDiscoveredDevices(gladys, apiClient) {
   logger.info(
     `ResMed myAir: device "${device.localizedName || device.deviceSeries}", last sleep data report: ${device.lastSleepDataReportTime || 'never'}`,
   );
-  return [convertToGladysDevice(gladys, device)];
+  const config = (await gladys.getConfig()) || {};
+  // Apply default filter intervals on first run so maintenance works out of the
+  // box (without re-saving the config form, which would clear the password).
+  const defaults = missingIntervalDefaults(config);
+  if (Object.keys(defaults).length > 0) {
+    await gladys.setConfig(defaults);
+    Object.assign(config, defaults);
+  }
+  return [convertToGladysDevice(gladys, device, config)];
 }
 
 /**
@@ -75,23 +84,34 @@ export function buildStatesFromRecord(ids, record) {
 export async function pollDevice(gladys, apiClient, device) {
   const serial = serialFromDevice(device.external_id);
   const ids = gladys.externalIds(DEVICE_TYPE, serial);
+  const states = [];
 
-  let records;
+  // Nightly sleep metrics (from the cloud).
   try {
-    records = await apiClient.getSleepRecords();
+    const records = await apiClient.getSleepRecords();
+    logger.info(`ResMed myAir: fetched ${records.length} sleep record(s) for the last 30 days.`);
+    const record = latestSleepRecord(records);
+    if (record) {
+      states.push(...buildStatesFromRecord(ids, record));
+    } else {
+      logger.info('ResMed myAir: no sleep record available yet.');
+    }
   } catch (e) {
-    logger.debug(`ResMed myAir: unable to poll ${device.name}: ${e.message}`);
-    return;
+    logger.debug(`ResMed myAir: unable to fetch sleep records for ${device.name}: ${e.message}`);
   }
 
-  logger.info(`ResMed myAir: fetched ${records.length} sleep record(s) for the last 30 days.`);
-  const record = latestSleepRecord(records);
-  if (!record) {
-    logger.info('ResMed myAir: no sleep record available yet.');
-    return;
+  // Consumable maintenance (local, time-based — published even with no night).
+  const config = (await gladys.getConfig()) || {};
+  const { states: maintenanceStates, datesToPersist } = computeMaintenanceStates(
+    ids,
+    config,
+    Date.now(),
+  );
+  if (Object.keys(datesToPersist).length > 0) {
+    await gladys.setConfig(datesToPersist);
   }
+  states.push(...maintenanceStates);
 
-  const states = buildStatesFromRecord(ids, record);
   if (states.length > 0) {
     await gladys.publishStates(states);
   }

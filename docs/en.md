@@ -45,6 +45,17 @@ The device is then **remembered**: you should not be asked for a code again. If 
 - **Refresh sleep data now** — fetches the latest data immediately.
 - **Disconnect** — removes the stored tokens.
 
+## Filter maintenance (reminders)
+
+The integration can track filter wear and **remind you when to replace them**:
+
+1. In **Configuration**, set a **replacement interval in days** for the **device filter** and/or the **mask filter** (0 disables tracking). Default: 30 days.
+2. A **"Filter life"** sensor (%) is created for each enabled filter — it counts down from 100% to 0% over the interval.
+3. Create a **scene** triggered by that sensor (e.g. _when "Device filter life" ≤ 10% → send me a notification_). That is your reminder.
+4. Each time you change one, run the **"Mark a filter as replaced"** action (pick the filter): its life resets to 100%.
+
+The countdown is in **calendar days** since the last replacement.
+
 ## Dashboard widget
 
 The integration provides a **"Last night"** widget for your dashboards (editor → **+** → "Last night"). It shows the four latest-night metrics (usage, AHI, mask leak, score) as color-coded tiles (green / amber / red by threshold). With no recent data, it shows a clear empty state.
