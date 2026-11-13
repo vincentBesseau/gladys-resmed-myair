@@ -1,0 +1,146 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "myAir",
+  "description": {
+    "en": "Read your ResMed CPAP sleep data (usage, AHI, mask leak, score) from the myAir cloud.",
+    "fr": "Données de votre PPC ResMed (usage, IAH, fuite masque, score) depuis le cloud myAir."
+  },
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/vincentbesseau/gladys-resmed-myair:0.1.0",
+  "gladys_version": ">=4.86.0",
+  "cover_image": "https://raw.githubusercontent.com/vincentBesseau/gladys-resmed-myair/main/cover.jpg",
+  "categories": ["health"],
+  "transports": ["cloud"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Connect your ResMed myAir account",
+        "fr": "Connectez votre compte ResMed myAir"
+      },
+      "description": {
+        "en": "This integration reads the nightly therapy data your ResMed CPAP machine (AirSense, AirCurve...) reports to the myAir cloud - the same account used by the myAir app and website. It is READ-ONLY (it never changes any setting on your machine) and everything goes through ResMed's cloud: no local network access. This is an UNOFFICIAL, reverse-engineered API: ResMed can change it without notice. The data is updated once a day, when your machine syncs.",
+        "fr": "Cette intégration lit les données de thérapie nocturne que votre machine PPC ResMed (AirSense, AirCurve...) envoie au cloud myAir - le même compte que celui de l'application et du site myAir. Elle est en LECTURE SEULE (elle ne modifie aucun réglage de votre machine) et tout transite par le cloud ResMed : aucun accès réseau local. Il s'agit d'une API NON OFFICIELLE, reconstituée par rétro-ingénierie : ResMed peut la modifier sans préavis. Les données sont mises à jour une fois par jour, lors de la synchronisation de votre machine."
+      }
+    },
+    {
+      "key": "region",
+      "type": "select",
+      "label": {
+        "en": "myAir region",
+        "fr": "Région myAir"
+      },
+      "required": true,
+      "default": "EU",
+      "options": [
+        {
+          "value": "EU",
+          "label": {
+            "en": "Europe (myair.resmed.eu)",
+            "fr": "Europe (myair.resmed.eu)"
+          }
+        },
+        {
+          "value": "NA",
+          "label": {
+            "en": "North America (myair.resmed.com)",
+            "fr": "Amérique du Nord (myair.resmed.com)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "myAir email",
+        "fr": "Email myAir"
+      },
+      "placeholder": {
+        "en": "you@example.com",
+        "fr": "vous@exemple.com"
+      },
+      "required": true
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe"
+      },
+      "required": true
+    },
+    {
+      "key": "mfa_note",
+      "type": "section",
+      "label": {
+        "en": "Verification code (sent by email)",
+        "fr": "Code de vérification (envoyé par email)"
+      },
+      "description": {
+        "en": "After saving, ResMed emails you a one-time verification code. The connection status below will ask for it: use the \"Enter verification code\" action to finish connecting. This device is then remembered, so you should not be asked again unless the remembered device expires - in which case use the \"Reconnect\" action to receive a fresh code.",
+        "fr": "Après l'enregistrement, ResMed vous envoie un code de vérification à usage unique par email. Le statut de connexion ci-dessous vous le demandera : utilisez l'action « Saisir le code de vérification » pour terminer la connexion. Cet appareil est ensuite mémorisé, vous ne devriez donc plus être sollicité, sauf expiration de l'appareil mémorisé - auquel cas utilisez l'action « Reconnecter » pour recevoir un nouveau code."
+      }
+    }
+  ],
+  "actions": [
+    {
+      "key": "submit_mfa_code",
+      "label": {
+        "en": "Enter verification code",
+        "fr": "Saisir le code de vérification"
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "mfa_code",
+          "type": "string",
+          "label": {
+            "en": "Verification code",
+            "fr": "Code de vérification"
+          },
+          "placeholder": {
+            "en": "123456",
+            "fr": "123456"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "reconnect",
+      "label": {
+        "en": "Reconnect (send a new code)",
+        "fr": "Reconnecter (envoyer un nouveau code)"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test connection",
+        "fr": "Tester la connexion"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "scan_now",
+      "label": {
+        "en": "Refresh sleep data now",
+        "fr": "Actualiser les données maintenant"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "disconnect",
+      "label": {
+        "en": "Disconnect",
+        "fr": "Déconnecter"
+      },
+      "timeout_seconds": 15
+    }
+  ]
+}
