@@ -1,6 +1,6 @@
 {
   "name": "gladys-resmed-myair",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "External integration to read your ResMed CPAP sleep data (usage, AHI, mask leak, myAir score) through the ResMed myAir cloud.",
