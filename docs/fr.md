@@ -45,6 +45,10 @@ L'appareil est ensuite **mémorisé** : vous ne devriez plus être sollicité po
 - **Actualiser les données maintenant** — relance la récupération immédiatement.
 - **Déconnecter** — supprime les jetons stockés.
 
+## Widget tableau de bord
+
+L'intégration fournit un widget **« Dernière nuit »** à ajouter à vos tableaux de bord (éditeur → **+** → « Dernière nuit »). Il affiche en tuiles les 4 métriques de la nuit la plus récente (usage, IAH, fuite au masque, score), avec un code couleur par seuil (vert / orange / rouge). Sans données récentes, il affiche un état vide explicite.
+
 ## Fréquence de mise à jour
 
 Les machines ResMed ne synchronisent leurs données qu'**environ une fois par jour**. L'intégration interroge le cloud toutes les heures pour récupérer la dernière nuit disponible dès qu'elle apparaît. Il est donc normal que les valeurs ne changent qu'une fois par jour.

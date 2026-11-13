@@ -8,10 +8,24 @@
   },
   "version": "0.1.0",
   "docker_image": "ghcr.io/vincentbesseau/gladys-resmed-myair:0.1.0",
-  "gladys_version": ">=4.86.0",
+  "gladys_version": ">=5.2.0",
   "cover_image": "https://raw.githubusercontent.com/vincentBesseau/gladys-resmed-myair/main/cover.jpg",
   "categories": ["health"],
   "transports": ["cloud"],
+  "widgets": [
+    {
+      "key": "last_night",
+      "label": {
+        "en": "Last night",
+        "fr": "Dernière nuit"
+      },
+      "description": {
+        "en": "Your latest night's CPAP metrics (usage, AHI, mask leak, score).",
+        "fr": "Les métriques de votre dernière nuit (usage, IAH, fuite, score)."
+      },
+      "icon": "moon"
+    }
+  ],
   "config_schema": [
     {
       "key": "intro",

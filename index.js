@@ -19,6 +19,7 @@ import { MyAirAuthClient, MFARequiredError } from './src/MyAirAuthClient.js';
 import { MyAirApiClient } from './src/MyAirApiClient.js';
 import { buildDiscoveredDevices, pollDevice } from './src/devices.js';
 import { REFRESH_INTERVAL_MS } from './src/constants.js';
+import { WIDGET_KEY, buildWidgetContent, buildDisconnectedWidgetContent } from './src/widget.js';
 
 const gladys = new GladysIntegration();
 const auth = new MyAirAuthClient(gladys);
@@ -130,6 +131,21 @@ gladys.onPoll(async (device) => {
   }
   await pollDevice(gladys, apiClient, device);
   lastRefreshAt = Date.now();
+  // Nudge the dashboard widget so it reflects the freshly fetched night.
+  gladys.requestWidgetRefresh(WIDGET_KEY);
+});
+
+// --- Dashboard widget: the latest night's metrics ----------------------------
+gladys.onWidgetGet(WIDGET_KEY, async () => {
+  try {
+    await auth.loadConfig();
+    await auth.ensureAuthenticated({ allowMfaEmail: false });
+  } catch (e) {
+    logger.debug(`ResMed myAir: widget requested while not connected: ${e.message}`);
+    return buildDisconnectedWidgetContent();
+  }
+  const records = await apiClient.getSleepRecords();
+  return buildWidgetContent(records);
 });
 
 // --- Manifest action: finish signing in with the emailed code ----------------

@@ -91,6 +91,14 @@ jobs:
           echo "image_ref=${image}:${version}" >> "$GITHUB_OUTPUT"
           echo "tags=$tags" >> "$GITHUB_OUTPUT"
 
+      # Bake the manifest (minified) into an image label so a developer-mode
+      # "install from image" (no inline manifest, no repo) can read it — Gladys
+      # reads exactly this label (io.gladysassistant.manifest).
+      - name: Compute manifest label
+        id: manifest
+        run: |
+          echo "json=$(node -e "process.stdout.write(JSON.stringify(require('./gladys-assistant-integration.json')))")" >> "$GITHUB_OUTPUT"
+
       - name: Build and push (amd64 + arm64)
         uses: docker/build-push-action@v6
         with:
@@ -98,6 +106,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            io.gladysassistant.manifest=${{ steps.manifest.outputs.json }}
 
       - name: Docker build summary
         env:

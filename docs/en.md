@@ -45,6 +45,10 @@ The device is then **remembered**: you should not be asked for a code again. If 
 - **Refresh sleep data now** — fetches the latest data immediately.
 - **Disconnect** — removes the stored tokens.
 
+## Dashboard widget
+
+The integration provides a **"Last night"** widget for your dashboards (editor → **+** → "Last night"). It shows the four latest-night metrics (usage, AHI, mask leak, score) as color-coded tiles (green / amber / red by threshold). With no recent data, it shows a clear empty state.
+
 ## Update frequency
 
 ResMed machines only sync their data **about once a day**. The integration polls the cloud hourly to pick up the latest night as soon as it appears, so it is normal for the values to change only once a day.

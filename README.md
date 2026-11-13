@@ -20,6 +20,10 @@ One device (your CPAP machine) with, for the most recent night, these read-only 
 
 ResMed machines sync roughly once a day, so the values update once a day (polled hourly to catch the sync promptly).
 
+## Dashboard widget
+
+Declares a **`last_night`** dashboard widget (manifest `widgets` + SDK `onWidgetGet`, see [`src/widget.js`](src/widget.js)): the latest night's usage, AHI, mask leak and score as color-coded `value` tiles, with a clear empty state when there is no recent data. Requires a widget-capable Gladys (`gladys_version >= 5.2.0`).
+
 ## How authentication works
 
 myAir sits behind Okta. The integration runs Okta's OAuth2 authorization-code + PKCE flow itself:
